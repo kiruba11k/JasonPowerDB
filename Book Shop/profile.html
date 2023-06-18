@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+</head>
+<body>
+    <table align="center">
+        <tr>
+            <td>
+                <b>Check Books Here</b>
+                <br>
+                <br>
+                <label>Click</label><br>
+                <input type="button" value="check" onclick="checkData();">
+            </td>
+        </tr>
+    </table>
+    <div id="show"></div>
+    <script>
+        var connToken = "90933139|-31949318933286808|90951339";
+
+        function checkData() {
+            var uid = $("#uid").val();
+            if (uid === "") {
+                alert("Please enter your ID.");
+                return;
+            }
+
+            var getRequest = {
+                "token": connToken,
+                "cmd": "GET_ALL_RELATIONS",
+                "dbName": "Book"
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "http://api.login2explore.com:5577//api/irl",
+                data: JSON.stringify(getRequest),
+                contentType: "application/json",
+                success: function(result) {
+                    var jsonObj = JSON.parse(result);
+                    if (jsonObj.status === "success") {
+                        var tables = jsonObj.dbRows;
+                        var html = "<h2>Database Tables:</h2>";
+                        for (var i = 0; i < tables.length; i++) {
+                            html += "<h3>" + tables[i] + "</h3>";
+                        }
+                        $("#show").html(html);
+                    } else {
+                        $("#show").html("Acces Denied Error retrieving database tables.");
+                    }
+                },
+                error: function() {
+                    $("#show").html("Access denied Error retrieving database tables.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

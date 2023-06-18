@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Shop - Update Book</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+</head>
+<body>
+    <h1>Book Shop</h1>
+
+    <h2>Update Book</h2>
+    <form id="updateBookForm">
+        <label for="bookId">Record Number:</label>
+        <input type="text" id="recId" name="recId"/>
+        <br>
+        <label for="bookTitle">New Title:</label>
+        <input type="text" id="bookTitle" name="bookTitle"/>
+        <br>
+        <label for="bookAuthor">New Author:</label>
+        <input type="text" id="bookAuthor" name="bookAuthor"/>
+        <br>
+        <input type="button" value="Update Book" onclick="updateBook();" />
+    </form>
+
+    <script>
+        var connToken = "90933139|-31949318933286808|90951339";
+        var dbName = "Book";
+        var relName = "Book-Rel";
+
+        function createUPDATERequest(connToken, jsonObj, dbName, relName, recId) {
+            var updateRequest = "{\n" +
+            "\"token\": \"" + connToken + "\",\n" +
+            "\"cmd\": \"UPDATE\",\n" +
+            "\"dbName\": \"" + dbName + "\",\n" +
+            "\"rel\": \"" + relName + "\",\n" +
+            "\"jsonStr\": {\n" +
+            "\"" + recId + "\": \n" +
+            jsonObj +
+            "\n" +
+            "}\n" +
+            "}";
+            return updateRequest;
+        }
+
+        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+
+            $.post(url, reqString, function(result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function(result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+
+            return jsonObj;
+        }
+
+        function GetFormData() {
+            var reckId = parseInt(document.getElementById("recId").value);
+            var newName = document.getElementById("bookTitle").value;
+            var newAuthor = document.getElementById("bookAuthor").value;
+
+            var jsonStrObj = {
+                BookTitle: newName,
+                BookAuthor: newAuthor,
+            };
+            return JSON.stringify(jsonStrObj);
+        }
+
+        function updateBook() {
+            var jsonStr = GetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+            var recId = parseInt(document.getElementById("recId").value);
+
+            var updateReqStr = createUPDATERequest(
+                connToken,
+                jsonStr,
+                dbName,
+                relName,
+                recId,
+            );
+
+            alert(updateReqStr);
+            jQuery.ajaxSetup({async: false});
+            var resultObj = executeCommand(
+                updateReqStr,
+                "http://api.login2explore.com:5577",
+                "/api/iml"
+            );
+            jQuery.ajaxSetup({async: true});
+            alert("Updated Successfully: " + JSON.stringify(resultObj));
+        }
+    </script>
+</body>
+</html>

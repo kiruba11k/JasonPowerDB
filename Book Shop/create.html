@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Book Shop - Add Book</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+</head>
+<body>
+    <h1>Book Shop</h1>
+
+    <h2>Add Book</h2>
+
+    <form id="addBookForm">
+        <label for="bookId">Book ID:</label>
+        <input type="text" id="bookId" name="bookId"/>
+    
+        <label for="bookTitle">Title:</label>
+        <input type="text" id="bookTitle" name="bookTitle" />
+    
+        <label for="bookAuthor">Author:</label>
+        <input type="text" id="bookAuthor" name="bookAuthor" />
+        
+        <input type="button" value="Add Book" onclick="addBook();"/>
+    </form>
+    
+    
+    <script>
+        var connToken = "90933139|-31949318933286808|90951339";
+        var dbName = "Book";
+        var relName = "Book-Rel";
+    
+        function createPUTRequest(connToken, jsonObj, dbName, relName) {
+            var putRequest = "{\n"
+                    + "\"token\" : \""
+                    + connToken
+                    + "\","
+                    + "\"dbName\": \""
+                    + dbName
+                    + "\",\n" + "\"cmd\" : \"PUT\",\n"
+                    + "\"rel\" : \""
+                    + relName + "\","
+                    + "\"jsonStr\": \n"
+                    + jsonObj
+                    + "\n"
+                    + "}";
+            return putRequest;
+        }
+        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+            $.post(url, reqString, function (result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function (result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+            return jsonObj;
+        }
+
+        function GetFormData() {
+            
+            var bookId = document.getElementById("bookId").value;
+            var bookAuthor = document.getElementById("bookAuthor").value;
+            var bookTitle = document.getElementById("bookTitle").value;
+            
+            var jsonStrObj = {
+                BookId: bookId,
+                BookAuthor: bookAuthor,
+                BookTitle: bookTitle,
+                };
+            return JSON.stringify(jsonStrObj);
+        }
+
+        function addBook() {
+
+            var jsonStr = GetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+            var putReqStr = createPUTRequest("90933139|-31949318933286808|90951339",
+                    jsonStr, "Book", "Book-Rel");
+            alert(putReqStr);
+            jQuery.ajaxSetup({async: false});
+            var resultObj = executeCommand(putReqStr,
+                    "http://api.login2explore.com:5577", "/api/iml");
+            jQuery.ajaxSetup({async: true});
+            alert( "Added Succesfully "+JSON.stringify(resultObj));
+
+        }    
+    </script>
+</body>
+</html>
